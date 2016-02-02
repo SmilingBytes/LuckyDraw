@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Draw! Check your LUCK</title>
+	<meta name="description" content="Source code generated using layoutit.com">
+	<meta name="author" content="LayoutIt!">
+
+	<link href="css/bootstrap.min.css" rel="stylesheet">
+	<link href="css/style.css" rel="stylesheet">
+
+	<script type="text/javascript"> 
+	
+		var gift = ['0','1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20'];
+		var randNum = [];
+		var randRsults = [];
+		var giftCard = [110, 111, 112, 115, 1110, 1115,110, 25, 30, 50, 60, 80, 100, 120, 150, 200, 250, 300, 500, 1000, 5000];
+		
+		
+		
+	//Select Randomly uniqe index from array, where n is the total selected random number.
+		function RandUnique(array, n) {
+			var at = 0;
+			var tmp, current, top = array.length;
+
+			if(top) while(--top && at++ < n) {
+				current = Math.floor(Math.random() * (top - 1));
+				tmp = array[current];
+				array[current] = array[top];
+				array[top] = tmp;
+			}
+			return array.slice(-n);
+		}
+		
+		
+	//View randomly unique gift card, [total 6 gift cards]
+		function draw(){
+			var i=1;
+			randNum = RandUnique(gift, 6);
+			$("#info").html(" ");
+			while(i<7){
+				$("#sp"+i).html("<img id='img"+i +"' alt='Card "+i +"' src='img/" +randNum[i-1]+".jpg'/>");
+				$("#card"+i).html("<span class='card-title'>$" +giftCard[randNum[i-1]] + "</span>");
+				i++;
+			}
+		
+			//window.localStorage.clear();
+		//User Balance (Amount) Initiation
+			if (localStorage.usd) {
+				$(".amount").html("$"+localStorage.usd);
+			}else {
+				localStorage.usd = 1000;
+				$(".amount").html("$"+localStorage.usd);
+			}
+		
+		//Game Level Initiation
+			if (localStorage.level) {
+				$(".level").html(localStorage.level);
+			}else {
+				localStorage.level = 1;
+				$(".level").html(localStorage.level);
+			}
+		
+		//User Name Initiation
+			if (localStorage.name) {
+				$("#name").html(localStorage.name);
+			}else{
+				var name = prompt("Please enter your name", "Ismail H Rana");
+				if (name != null) {
+					localStorage.name = name;
+					$("#name").html(localStorage.name);
+				}
+			}
+			
+		//Total Played Initiation
+			if (localStorage.played) {
+				$(".played").html(localStorage.played);
+			}else {
+				localStorage.played = 0;
+				$(".played").html(localStorage.played);
+			}
+			
+		//Total Earned Initiation
+			if (localStorage.earned) {
+				$(".earned").html(localStorage.earned);
+			}else {
+				localStorage.earned = 1000;
+				$(".earned").html(localStorage.earned);
+			}
+		
+		//Total Points Initiation
+			if (localStorage.points) {
+				$(".points").html(localStorage.points);
+			}else {
+				localStorage.points = 0;
+				$(".points").html(localStorage.points);
+			}
+		
+		
+		}
+		
+	//Redrow function	
+		function redraw(){
+			setAmmount(-20);
+			draw();
+		}
+		
+		
+	//Hide gift card to select an unknown card
+		function getResults(){
+			if(localStorage.usd<100){
+				$("#info").html("<b class='text-center text-danger'>You have no enough Money</b>");
+				return false;
+			}else{
+				setAmmount(-100);
+				localStorage.played = Number(localStorage.played) + 1;
+				var i=1;
+				//randRsults = RandUnique(randNum, 6);
+				while(i<7){
+					$("#sp"+i).html("<a href='#' onclick='pubResult("+i +");'><img id='img"+i +"' alt='Card "+i +"' src='img/0.jpg'/></a>");
+					$("#card"+i).html("<span class='card-title'>Card "+i +"</span>");
+					i++;
+				}
+				$("#get").html(" ");
+				$("#info").html("<b class='text-center text-info'>Please select a Card by clicking on a Card. </b>");
+			}
+		}
+		 
+		 
+	//Publish result that was selected by the user
+		function pubResult(id){
+			var i=1;
+			randRsults = RandUnique(randNum, 6);
+			while(i<7){
+				if(id == i){
+					$("#sp"+i).html("<img id='img"+i +"' class='img-thumbnail imgSuccess' alt='Card "+i +"' src='img/"+randRsults[i-1] +".jpg'/>");
+					$("#card"+i).html("<span class='card-title text-success'>$" +giftCard[randRsults[i-1]] + "</span>");
+					
+					$("#info").html("<b class='text-center text-info'>You won $"+giftCard[randRsults[i-1]] +"</b>");
+					
+					$("#get").html("<button type='button' onclick='getPrize("+giftCard[randRsults[i-1]] +");' class='btn active btn-success pull-right'>Take your Prize </button>");
+					
+				}else{
+					$("#sp"+i).html("<img id='img"+i +"' class='lessOpacity img-rounded' alt='Card "+i +"' src='img/"+randRsults[i-1] +".jpg'/>");
+					$("#card"+i).html("<span class='card-title'>$" +giftCard[randRsults[i-1]] + "</span>");
+				}
+				i++;
+			}
+		}
+	
+	
+	//Get prize function 
+		function getPrize(prize){
+			setAmmount(prize);
+			if( prize >= 100 ){
+				localStorage.points = Number(localStorage.points) + 1;
+			}else{
+				localStorage.points = Number(localStorage.points) - 1;
+			}
+			localStorage.earned = Number(localStorage.earned) + prize; 
+			
+			var L = Number(localStorage.level);
+			var k = (L+1)*(L+1);
+			var t = Math.floor(300*k);
+			t = Number(t);
+			var earned = Number(localStorage.earned);
+
+			if( t < earned ){
+				localStorage.level = Number(localStorage.level) + 1;
+				$(".level").html(localStorage.level);
+				var bonus = Number(Number(localStorage.level)*200);
+				alert(' Level UP!!!\n Your new level is '+localStorage.level+ '\n Bonus : '+bonus);
+				getPrize(Number(bonus));
+			}
+			
+			$("#get").html("<button type='button' onclick='getResults();' class='btn btn-primary pull-right'>Draw ($100)</button>");
+			$("#info").html(" ");
+			draw();
+		}
+	//Set ammount for user
+		function setAmmount(usd){
+			localStorage.usd = Number(localStorage.usd) + usd;
+			$(".amount").html("$"+localStorage.usd);
+		}
+	</script>
+
+	
+	<style>
+		#img1, #img2, #img3, #img4, #img5, #img6 {height: 150px; width: 160px; max-height:160px; max-width:164px;}
+		.imgSuccess{background:#0f0; border: 2px solid #oof;}
+		.lessOpacity{opacity: .3;}
+		#name{font-size:20px; padding-left:5px; font-weight:500;}
+		.select-info{font-size:20pz;}
+		.jumbotron{min-height: 350px;}
+	</style>
+</head>
+  <body onload="draw();">
+
+    <div class="container-fluid">
+	<div class="row">
+		<div class="col-md-12">
+			<h1 class="text-center text-primary">
+				Draw
+			</h1>
+		</div><br />
+		<div class="col-md-8">
+			<span class="text-primary pull-left" id="name"></span>
+		</div>
+		<div class="col-md-3">
+			<button class="btn btn-success pull-left active" type="button">
+				Level <span class="level badge"></span>
+			</button>
+			<button class="btn btn-info pull-right active" type="button">
+				Amount <span class="amount badge"></span>
+			</button>
+		</div>
+	</div><br />
+	
+	<div class="row">
+		<div class="col-md-12">
+			<div class="jumbotron">
+				<div class="col-md-offset-4 col-md-4" id="info"></div>
+				<div class="col-md-4"></div><br />
+				<div class="tabbable" id="tabs-819458">
+					<ul class="nav nav-tabs">
+						<li class="active">
+							<a href="#panel-620274" data-toggle="tab">Draw</a>
+						</li>
+						<li>
+							<a href="#panel-689493" data-toggle="tab">History</a>
+						</li>
+					</ul>
+					<div class="tab-content">
+						<div class="tab-pane active" id="panel-620274">
+							<div class="row">
+								<div class="col-md-2">
+									<div class="thumbnail">
+										<span id="sp1"><img id="img1" alt="Bootstrap Thumbnail First" src="img/1.jpg"></span>
+										<div class="caption">
+											<h3 id="card1">
+												Card
+											</h3>
+										</div>
+									</div>
+								</div>
+								<div class="col-md-2">
+									<div class="thumbnail">
+										<span id="sp2"><img id="img2" alt="Bootstrap Thumbnail First" src="img/1.jpg"></span>
+										<div class="caption">
+											<h3 id="card2">
+												Card
+											</h3>
+										</div>
+									</div>
+								</div>
+								<div class="col-md-2">
+									<div class="thumbnail">
+										<span id="sp3"><img id="img3" alt="Bootstrap Thumbnail First" src="img/1.jpg"></span>
+										<div class="caption">
+											<h3 id="card3">
+												Card
+											</h3>
+										</div>
+									</div>
+								</div>
+								<div class="col-md-2">
+									<div class="thumbnail">
+										<span id="sp4"><img id="img4" alt="Bootstrap Thumbnail First" src="img/1.jpg"></span>
+										<div class="caption">
+											<h3 id="card4">
+												Card
+											</h3>
+										</div>
+									</div>
+								</div>
+								<div class="col-md-2">
+									<div class="thumbnail">
+										<span id="sp5"><img id="img5" alt="Bootstrap Thumbnail First" src="img/1.jpg"></span>
+										<div class="caption">
+											<h3 id="card5">
+												Card
+											</h3>
+										</div>
+									</div>
+								</div>
+								<div class="col-md-2">
+									<div class="thumbnail">
+										<span id="sp6"><img id="img6" alt="Bootstrap Thumbnail First" src="img/1.jpg"></span>
+										<div class="caption">
+											<h3 id="card6">
+												Card
+											</h3>
+										</div>
+									</div>
+								</div>
+							</div> 
+							<span id="result"></span>
+							<button type="button" onclick="redraw();" class="btn btn-warning pull-left">Redrow ($20)</button>
+							<span id="get">
+								<button type="button" onclick="getResults();" class="btn btn-primary pull-right">Draw ($100)</button>
+							</span>
+						</div>
+						<div class="tab-pane" id="panel-689493">
+							<div class="col-md-4"><br />
+								<table class="table table-bordered">
+									<tbody>
+										<tr class="info">
+											<td>1</td>
+											<td>Total Played</td>
+											<td><span class="played"></span></td>
+										</tr>
+										<tr class="success">
+											<td>2</td>
+											<td>Total Earned</td>
+											<td><span class="earned"></span></td>
+										</tr>
+										<tr class="warning">
+											<td>3</td>
+											<td>Current Amount</td>
+											<td><span class="amount"></span></td>
+										</tr>
+										<tr class="danger">
+											<td>4</td>
+											<td>Current Level</td>
+											<td><span class="level"></span></td>
+										</tr>
+										<tr class="active">
+											<td>5</td>
+											<td>Won/(-Loss)</td>
+											<td><span class="points"></span></td>
+										</tr>
+									</tbody>
+								</table> <button type="button" onclick="window.localStorage.clear();" class="btn btn-danger">Reset All </button>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+    <script src="js/jquery.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <script src="js/scripts.js"></script>
+  </body>
+</html>
